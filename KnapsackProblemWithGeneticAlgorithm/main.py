@@ -1,4 +1,5 @@
 import random
+import time
 
 MAX_KNAPSACK_WEIGHT = 50
 CROSSOVER_RATE = 0.8
@@ -112,6 +113,7 @@ def knapsack():
     return best_solution
 
 if __name__ == '__main__':
+    start_time = time.time()
     print(f"Generating {NUM_ITEMS} random items...\n")
     items = generate_items(NUM_ITEMS)
 
@@ -128,3 +130,7 @@ if __name__ == '__main__':
     for bit, item in zip(solution.bits, items):
         if bit:
             print(f"- {item}")
+
+    end_time = time.time()
+    execution = end_time - start_time
+    print(f"\nTotal time: {execution:.4f} seconds")
