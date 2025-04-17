@@ -7,41 +7,45 @@ MUTATION_RATE = 0.01
 REPRODUCTION_RATE = 0.15
 GENERATIONS = 1000
 POPULATION_SIZE = 10
-NUM_ITEMS = 15  
+NUM_ITEMS = 15
+
 
 class Item:
     def __init__(self, name, weight, value):
         self.name = name
         self.weight = weight
         self.value = value
-        
+
     def __str__(self):
         return f"{self.name} (Value: {self.value}, Weight: {self.weight})"
-    
+
+
 class Individual:
     def __init__(self, bits):
         self.bits = bits
-    
+
     def __str__(self):
         return f"Bits: {self.bits}, Fitness: {self.fitness()}"
 
     def __hash__(self):
         return hash(str(self.bits))
-    
+
     def fitness(self):
         total_value = sum(bit * item.value for item, bit in zip(items, self.bits))
         total_weight = sum(bit * item.weight for item, bit in zip(items, self.bits))
 
         return total_value if total_weight <= MAX_KNAPSACK_WEIGHT else 0
 
+
 def generate_items(num):
     item_list = []
     for i in range(num):
-        name = f"Item-{i+1}"
+        name = f"Item-{i + 1}"
         weight = random.randint(1, 15)
         value = random.randint(5, 25)
         item_list.append(Item(name, weight, value))
     return item_list
+
 
 def init_population(count=POPULATION_SIZE):
     population = set()
@@ -50,12 +54,14 @@ def init_population(count=POPULATION_SIZE):
         population.add(Individual(bits))
     return list(population)
 
+
 def selection(population):
     parents = []
     contenders = random.sample(population, 4)
     parents.append(max(contenders[:2], key=lambda i: i.fitness()))
     parents.append(max(contenders[2:], key=lambda i: i.fitness()))
     return parents
+
 
 def crossover(parents):
     N = len(items)
@@ -64,14 +70,19 @@ def crossover(parents):
     child2 = parents[1].bits[:cut] + parents[0].bits[cut:]
     return [Individual(child1), Individual(child2)]
 
+
 def mutate(individuals):
     for individual in individuals:
         for i in range(len(individual.bits)):
             if random.random() < MUTATION_RATE:
                 individual.bits[i] = 1 - individual.bits[i]
 
+
 def next_generation(population):
     next_gen = []
+
+    elite = max(population, key=lambda i: i.fitness())
+    next_gen.append(elite)
     while len(next_gen) < len(population):
         parents = selection(population)
 
@@ -86,11 +97,13 @@ def next_generation(population):
             mutate(children)
 
         next_gen.extend(children)
-    
+
     return next_gen[:len(population)]
+
 
 def average_fitness(population):
     return sum(i.fitness() for i in population) / len(population)
+
 
 def knapsack():
     population = init_population()
@@ -110,7 +123,13 @@ def knapsack():
         population = next_generation(population)
 
     best_solution = max(population, key=lambda i: i.fitness())
+    best_fitness = best_solution.fitness()
+    count_best = sum(1 for index in population if index.fitness() == best_fitness)
+
+    print(f"\nFinal best fitness: {best_fitness}")
+    print(f"Number of individuals with best fitness: {count_best}")
     return best_solution
+
 
 if __name__ == '__main__':
     start_time = time.time()
